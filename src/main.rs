@@ -1,12 +1,45 @@
 use std::env;
 use actix_web::{get, HttpServer, App, Responder, HttpResponse, web};
 use dotenv::dotenv;
+use crate::picked_state::STATE;
 
-struct StateInfo {
-    pub _state_id: i32,
-    pub _population: String,
-    pub _name: String,
-    pub _capital_name: String,
+mod states {
+    pub struct StateInfo {
+        pub _state_id: i32,
+        pub _population: String,
+        pub _name: String,
+        pub _capital_name: String,
+    }
+}
+
+mod picked_state {
+    pub enum STATE {
+        _NH,
+        _MA,
+        _NJ,
+        _MAINE,
+    }
+
+    impl STATE {
+        pub fn get(&self) {
+            match self {
+                STATE::_NH => {
+                    println!("{}", "Welcome to NH Info")
+                }
+                STATE::_MA => {
+                    println!("{}", "Welcome to MA Info")
+                }
+
+                STATE::_NJ => {
+                    println!("{}", "Welcome to NJ Info")
+                }
+
+                STATE::_MAINE => {
+                    println!("{}", "Welcome to MAINE Info")
+                }
+            }
+        }
+    }
 }
 
 #[get("/Name")]
@@ -15,10 +48,13 @@ async fn get_name() -> impl Responder {
     let e_args = env::var("NAME");
     let s = e_args.clone();
 
+    let ma_state = STATE::_MA;
+    STATE::get(&ma_state);
+
     let pop = env::var("POPULATION");
 
 
-    let data_state_1 = &StateInfo {
+    let data_state_1 = &states::StateInfo {
         _state_id: 2,
         _population: pop.unwrap(),
         _name: s.unwrap().to_string(),
@@ -41,7 +77,7 @@ async fn main_route() -> impl Responder {
 
     let e_pop = env::var("POPULATION");
 
-    let data_state = &StateInfo {
+    let data_state = &states::StateInfo {
         _state_id: 1,
         _population: e_pop.unwrap(),
         _name: String::from(""),
@@ -55,7 +91,7 @@ async fn main_route() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
+    
     's: loop {
         HttpServer::new(|| {
             App::new().service(main_route).route("/", web::get()
