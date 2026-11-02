@@ -1,6 +1,7 @@
 use std::env;
 use actix_web::{get, HttpServer, App, Responder, HttpResponse, web};
 use dotenv::dotenv;
+use STATE::_NH;
 use crate::picked_state::STATE;
 use crate::routes_visit::Routes;
 
@@ -22,21 +23,25 @@ mod picked_state {
     }
 
     impl STATE {
-        pub fn get(&self) {
+        pub fn get(&self) -> String {
             match self {
                 STATE::_NH => {
-                    println!("{}", "Welcome to NH Info")
+                    println!("{}", "Welcome to NH Info");
+                    format!("{}", String::from("nh".to_uppercase()))
                 }
                 STATE::_MA => {
-                    println!("{}", "Welcome to MA Info")
+                    println!("{}", "Welcome to MA Info");
+                    format!("{}", "ma".to_uppercase())
                 }
 
                 STATE::_NJ => {
-                    println!("{}", "Welcome to NJ Info")
+                    println!("{}", "Welcome to NJ Info");
+                    format!("{}", "nj".to_uppercase())
                 }
 
                 STATE::_MAINE => {
-                    println!("{}", "Welcome to MAINE Info")
+                    println!("{}", "Welcome to MAINE Info");
+                    format!("{}", "maine".to_uppercase())
                 }
             }
         }
@@ -73,7 +78,7 @@ fn get_home(routes: Routes) -> String {
     let name = String::from("/Name");
     match routes {
         Routes::HOME => {
-            println!("{:?}", STATE::_NH.get());
+            println!("{:?}", _NH.get());
             s
         }
 
@@ -108,12 +113,19 @@ async fn main_route() -> impl Responder {
     HttpResponse::Ok().body(String::from(&data_state._capital_name))
 }
 
+#[get("/NH:pop")]
+async fn get_nh() -> impl Responder {
+
+    let state: STATE = STATE::_NH;
+    HttpResponse::Ok().body(format!("State: {:?}", state.get()))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
     's: loop {
         HttpServer::new(|| {
-            App::new().service(main_route).route(get_home(Routes::HOME).as_str(), web::get()
+            App::new().service(get_nh).route("/NH:pop", web::get()).service(main_route).route(get_home(Routes::HOME).as_str(), web::get()
             ).service(get_name).route(get_home(Routes::NAMES).as_str(), web::get())
         }).bind(("127.0.0.1", 3000))?.run().await.expect("No Port Found");
         break 's
