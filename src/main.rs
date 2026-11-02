@@ -55,6 +55,7 @@ async fn main_route() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
     's: loop {
         HttpServer::new(|| {
             App::new().service(main_route).route("/", web::get()
