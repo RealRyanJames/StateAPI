@@ -48,12 +48,20 @@ async fn main_route() -> impl Responder {
         _capital_name: String::from("Concord"),
     };
 
+    println!("{}", "Connected To Port".to_uppercase());
+
     HttpResponse::Ok().body(String::from(&data_state._capital_name))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new().service(main_route).route("/", web::get()).service(get_name).route("/Name", web::get())
-    }).bind(("127.0.0.1", 3000))?.run().await
+    's: loop {
+        HttpServer::new(|| {
+            App::new().service(main_route).route("/", web::get()
+            ).service(get_name).route("/Name", web::get())
+        }).bind(("127.0.0.1", 3000))?.run().await.expect("No Port Found");
+        break 's
+    }
+
+    Ok(())
 }
