@@ -2,6 +2,7 @@ use std::env;
 use actix_web::{get, HttpServer, App, Responder, HttpResponse, web};
 use dotenv::dotenv;
 use crate::picked_state::STATE;
+use crate::routes_visit::Routes;
 
 mod states {
     pub struct StateInfo {
@@ -47,12 +48,7 @@ async fn get_name() -> impl Responder {
     dotenv().ok();
     let e_args = env::var("NAME");
     let s = e_args.clone();
-
-    let ma_state = STATE::_MA;
-    STATE::get(&ma_state);
-
     let pop = env::var("POPULATION");
-
 
     let data_state_1 = &states::StateInfo {
         _state_id: 2,
@@ -62,6 +58,29 @@ async fn get_name() -> impl Responder {
     };
 
     HttpResponse::Ok().body(String::from(&data_state_1._name.to_uppercase()))
+}
+
+mod routes_visit {
+    pub enum Routes {
+        HOME,
+        NAMES,
+    }
+}
+
+
+fn get_home(routes: Routes) -> String {
+    let s = String::from("/");
+    let name = String::from("/Name");
+    match routes {
+        Routes::HOME => {
+            println!("{:?}", STATE::_NH.get());
+            s
+        }
+
+        Routes::NAMES => {
+            name
+        }
+    }
 }
 
 #[get("/")]
@@ -91,11 +110,11 @@ async fn main_route() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    
+
     's: loop {
         HttpServer::new(|| {
-            App::new().service(main_route).route("/", web::get()
-            ).service(get_name).route("/Name", web::get())
+            App::new().service(main_route).route(get_home(Routes::HOME).as_str(), web::get()
+            ).service(get_name).route(get_home(Routes::NAMES).as_str(), web::get())
         }).bind(("127.0.0.1", 3000))?.run().await.expect("No Port Found");
         break 's
     }
