@@ -1,9 +1,21 @@
-use std::env;
-use actix_web::{get, HttpServer, App, Responder, HttpResponse, web};
-use dotenv::dotenv;
-use STATE::_NH;
-use crate::picked_state::STATE;
 use crate::routes_visit::Routes;
+use crate::{_population::POPULATION, picked_state::STATE};
+use STATE::_NH;
+use actix_web::{App, HttpResponse, HttpServer, Responder, get, web};
+use dotenv::dotenv;
+use std::env;
+
+pub mod _population {
+    pub struct POPULATION {
+        pub _pop: i32,
+    }
+}
+
+impl _population::POPULATION {
+    pub fn get_pop(&self) -> i32 {
+        self._pop
+    }
+}
 
 mod states {
     pub struct StateInfo {
@@ -72,7 +84,6 @@ mod routes_visit {
     }
 }
 
-
 fn get_home(routes: Routes) -> String {
     let s = String::from("/");
     let name = String::from("/Name");
@@ -82,9 +93,7 @@ fn get_home(routes: Routes) -> String {
             s
         }
 
-        Routes::NAMES => {
-            name
-        }
+        Routes::NAMES => name,
     }
 }
 
@@ -113,23 +122,47 @@ async fn main_route() -> impl Responder {
     HttpResponse::Ok().body(String::from(&data_state._capital_name))
 }
 
-#[get("/NH:pop")]
-async fn get_nh() -> impl Responder {
-
+#[get("/NH:name")]
+async fn get_pop() -> impl Responder {
     let state: STATE = STATE::_NH;
     HttpResponse::Ok().body(format!("State: {:?}", state.get()))
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+#[get("/NH:pop")]
+async fn get_nh() -> impl Responder {
+    let state: STATE = STATE::_NH;
 
+    let pop_nh: _population::POPULATION = POPULATION {
+        _pop: 1_415_342 as i32,
+    };
+
+    let pop = _population::POPULATION::get_pop(&pop_nh);
+
+    HttpResponse::Ok().body(format!("State: {}, Population: {}", state.get(), pop))
+}
+
+async fn get_setup() -> std::io::Result<()> {
     's: loop {
         HttpServer::new(|| {
-            App::new().service(get_nh).route("/NH:pop", web::get()).service(main_route).route(get_home(Routes::HOME).as_str(), web::get()
-            ).service(get_name).route(get_home(Routes::NAMES).as_str(), web::get())
-        }).bind(("127.0.0.1", 3000))?.run().await.expect("No Port Found");
-        break 's
+            App::new()
+                .service(get_nh)
+                .route("/NH:pop", web::get())
+                .service(main_route)
+                .route(get_home(Routes::HOME).as_str(), web::get())
+                .service(get_name)
+                .route(get_home(Routes::NAMES).as_str(), web::get())
+        })
+        .bind(("127.0.0.1", 3000))?
+        .run()
+        .await
+        .expect("No Port Found");
+        break 's;
     }
 
     Ok(())
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    get_setup().await
 }
