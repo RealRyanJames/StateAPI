@@ -13,6 +13,10 @@ pub mod _population {
     pub struct MAPOPULATION {
         pub _pop: i32,
     }
+
+    pub struct NJPOPULATION {
+        pub _pop: i32,
+    }
 }
 
 impl _population::NHPOPULATION {
@@ -27,6 +31,14 @@ impl _population::MAPOPULATION {
     pub fn new(&self) -> Self {
         Self {
             _pop: 7_154_084 as i32,
+        }
+    }
+}
+
+impl _population::NJPOPULATION {
+    pub fn new(&self) -> Self {
+        Self {
+            _pop: 9_548_215 as i32,
         }
     }
 }
@@ -119,6 +131,18 @@ async fn main_route() -> impl Responder {
     HttpResponse::Ok().body(String::from(&data_state._capital_name))
 }
 
+/////////////////////////// NEW Jersery ////////////////////////////
+#[get("/NJ")]
+async fn get_nj() -> impl Responder {
+    let state_nj = STATE::_NJ;
+
+    let state_new_j = _population::NJPOPULATION { _pop: 9_548_215 };
+
+    let state_name = state_nj.get();
+    let pop = state_new_j.new()._pop;
+    HttpResponse::Ok().body(format!("State Name: {}, Population: {}", state_name, pop))
+}
+
 /////////////////////////// NEW HAMPSHIRE ////////////////////////////
 
 #[get("/NH/")]
@@ -176,6 +200,8 @@ async fn get_setup() -> std::io::Result<()> {
     's: loop {
         HttpServer::new(|| {
             App::new()
+                .service(get_nj)
+                .route("/NJ/", web::get())
                 .service(get_ma)
                 .route("/MA/", web::get())
                 .service(get_nh)
