@@ -12,8 +12,10 @@ pub mod _population {
 }
 
 impl _population::POPULATION {
-    pub fn get_pop(&self) -> i32 {
-        self._pop
+    pub fn new(&self) -> Self {
+        Self {
+            _pop: 1_415_342 as i32,
+        }
     }
 }
 
@@ -136,9 +138,13 @@ async fn get_nh() -> impl Responder {
         _pop: 1_415_342 as i32,
     };
 
-    let pop = _population::POPULATION::get_pop(&pop_nh);
+    let pop = _population::POPULATION::new(&pop_nh);
 
-    HttpResponse::Ok().body(format!("State: {}, Population: {}", state.get(), pop))
+    HttpResponse::Ok().body(format!(
+        "State: {}, Population: {}",
+        state.get(),
+        pop.new()._pop
+    ))
 }
 
 async fn get_setup() -> std::io::Result<()> {
